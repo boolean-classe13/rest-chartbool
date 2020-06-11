@@ -1,0 +1,11 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.chart-container {
+    max-width: 800px;
+    margin: 50px auto;
+    text-align: center;
+}

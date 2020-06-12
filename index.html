@@ -7,32 +7,13 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://momentjs.com/downloads/moment-with-locales.js" charset="utf-8"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js" charset="utf-8"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js" charset="utf-8"></script>
     </head>
     <body>
 
         <header>
-            <select id="scelta-venditore">
-                <option value="">-- scegli venditore --</option>
-                <option value="Riccardo">Riccardo</option>
-                <option value="Roberto">Roberto</option>
-                <option value="Marco">Marco</option>
-                <option value="Giuseppe">Giuseppe</option>
-            </select>
-            <select id="scelta-mese">
-                <option value="">-- scegli mese vendita --</option>
-                <option value="gennaio">gennaio</option>
-                <option value="febbraio">febbraio</option>
-                <option value="marzo">marzo</option>
-                <option value="aprile">aprile</option>
-                <option value="maggio">maggio</option>
-                <option value="giugno">giugno</option>
-                <option value="luglio">luglio</option>
-                <option value="agosto">agosto</option>
-                <option value="settembre">settembre</option>
-                <option value="ottobre">ottobre</option>
-                <option value="novembre">novembre</option>
-                <option value="dicembre">dicembre</option>
-            </select>
+            <select id="scelta-venditore"></select>
+            <select id="scelta-mese"></select>
             <input type="number" id="importo-vendita" placeholder="Inserisci importo">
             <button id="aggiungi-vendita">Aggiungi</button>
         </header>
@@ -52,6 +33,12 @@
 
         </div>
 
+        <script id="mese-template" type="text/x-handlebars-template">
+            <option value="{{ numero }}">{{ nome }}</option>
+        </script>
+        <script id="venditore-template" type="text/x-handlebars-template">
+            <option value="{{ valore }}">{{ nome }}</option>
+        </script>
         <!-- <script src="main.js" charset="utf-8"></script> -->
         <script src="main-update.js" charset="utf-8"></script>
     </body>

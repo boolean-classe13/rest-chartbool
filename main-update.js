@@ -4,6 +4,7 @@ $(document).ready(function() {
     // imposto le traduzioni di moment in italiano
     moment.locale('it');
 
+    // variabili globali dei grafici per poter gestire gli aggiornamenti
     var grafico_mesi;
     var grafico_venditori;
 
@@ -15,29 +16,43 @@ $(document).ready(function() {
         var mese_scelto = $('#scelta-mese').val();
         var importo_inserito = $('#importo-vendita').val();
 
-        var data_moment = moment(mese_scelto, 'MMMM');
-        var mese = data_moment.format('MM');
+        // controllo che i dati inseriti dall'utente siano tutti corretti
+        if(venditore_scelto != '' && mese_scelto != '' && importo_inserito > 0) {
+            $('#scelta-venditore').val('');
+            $('#scelta-mese').val('');
+            $('#importo-vendita').val('');
 
-        var data_vendita = '01/' + mese + '/2017';
+            var data_vendita = '01/' + mese_scelto + '/2017';
 
-        $.ajax({
-            'url': url_api,
-            'method': 'POST',
-            'data': {
-                salesman: venditore_scelto,
-                date: data_vendita,
-                amount: importo_inserito
-            },
-            'success': function(data) {
-                disegna_grafici(true);
-            },
-            'error': function() {
-                console.log('si è verificato un errore');
-            }
-        });
+            $.ajax({
+                'url': url_api,
+                'method': 'POST',
+                'data': {
+                    salesman: venditore_scelto,
+                    date: data_vendita,
+                    amount: importo_inserito
+                },
+                'success': function(data) {
+                    disegna_grafici(true);
+                },
+                'error': function() {
+                    console.log('si è verificato un errore');
+                }
+            });
+        } else if(venditore_scelto == '') {
+            alert('seleziona il venditore');
+        } else if(mese_scelto == '') {
+            alert('seleziona il mese');
+        } else {
+            alert('inserisci un importo valido');
+        }
 
     });
 
+    // funzione per recuperare i dati e disegnare i grafici
+    // riceve come parametro una variabile booleana:
+    // se aggiorna == true, significa che i grafici sono già stati disegnati e bisogna solo aggiornarli
+    // se aggiorna == false, significa che i grafici non sono ancora stati disegnati
     function disegna_grafici(aggiorna) {
 
         $.ajax({
@@ -52,6 +67,8 @@ $(document).ready(function() {
                 var mesi = Object.keys(dati_vendite_mensili);
                 // estraggo i valori, che saranno i dati del grafico
                 var dati_mesi = Object.values(dati_vendite_mensili);
+                // inserisco le option nella select dei mesi
+                popola_select_mese(mesi);
 
                 if(!aggiorna) {
                     // disegno per la prima volta il grafico
@@ -71,6 +88,9 @@ $(document).ready(function() {
                 var nomi_venditori = Object.keys(dati_vendite_venditori);
                 // estraggo i valori, che saranno i dati del grafico
                 var dati_venditori = Object.values(dati_vendite_venditori);
+                // inserisco le option nella select dei venditori
+                popola_select_venditori(nomi_venditori);
+
                 if(!aggiorna) {
                     // disegno per la prima volta il grafico
                     // disegno il grafico passandogli le etichette e i dati
@@ -91,26 +111,18 @@ $(document).ready(function() {
     }
 
     function prepara_dati_vendite_mensili(dati) {
-        var vendite_mensili = {
-            'gennaio': 0,
-            'febbraio': 0,
-            'marzo': 0,
-            'aprile': 0,
-            'maggio': 0,
-            'giugno': 0,
-            'luglio': 0,
-            'agosto': 0,
-            'settembre': 0,
-            'ottobre': 0,
-            'novembre': 0,
-            'dicembre': 0
-        };
+        // preparo l'oggetto con i mesi tramite un ciclo for, usando moment
+        var vendite_mensili = { };
+        for (var i = 1; i <= 12; i++) {
+            var nome_mese = moment(i, 'M').format('MMMM');
+            vendite_mensili[nome_mese] = 0;
+        }
 
         for (var i = 0; i < dati.length; i++) {
             // recupero la vendita corrente
             var vendita_corrente = dati[i];
             // recupero l'importo della vendita corrente
-            var importo_corrente = parseInt(vendita_corrente.amount);
+            var importo_corrente = parseFloat(vendita_corrente.amount);
             // recupero la data della vendita corrente
             var data_corrente = vendita_corrente.date;
             // costruisco l'oggetto moment a partire dalla data della vendita corrente
@@ -132,7 +144,7 @@ $(document).ready(function() {
             // recupero la vendita corrente
             var vendita_corrente = dati[i];
             // recupero l'importo della vendita corrente
-            var importo_corrente = parseInt(vendita_corrente.amount);
+            var importo_corrente = parseFloat(vendita_corrente.amount);
             // recupero il nome del venditore della vendita corrente
             var nome_corrente = vendita_corrente.salesman;
             // verifico se ho già trovato questo venditore nelle iterazioni precedenti
@@ -204,6 +216,19 @@ $(document).ready(function() {
 
     function disegna_grafico_vendite_venditori(etichette, dati) {
 
+        // genero i colori di sfondo e bordo dinamicamente
+        // in base a quanti dati ci sono da rappresentare
+        var colori_sfondo = [];
+        var colori_bordo = [];
+        var numero_colori = etichette.length;
+        for (var i = 0; i < numero_colori; i++) {
+            var rosso = genera_random(0, 255);
+            var verde = genera_random(0, 255);
+            var blu = genera_random(0, 255);
+            colori_sfondo.push('rgba(' + rosso + ', ' + verde + ', '+ blu + ', 0.2)');
+            colori_bordo.push('rgba(' + rosso + ', ' + verde + ', '+ blu + ', 1)');
+        }
+
         grafico_venditori = new Chart($('#grafico-vendite-venditori')[0].getContext('2d'), {
             type: 'pie',
             data: {
@@ -211,18 +236,8 @@ $(document).ready(function() {
                 datasets: [{
                     label: 'importi vendite',
                     data: dati,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)'
-                    ],
+                    backgroundColor: colori_sfondo,
+                    borderColor: colori_bordo,
                     borderWidth: 1
                 }]
             },
@@ -239,6 +254,42 @@ $(document).ready(function() {
             }
         });
 
+    }
+
+    function popola_select_mese(mesi) {
+        var template = Handlebars.compile($('#mese-template').html());
+        // svuoto la select e inserisco la prima option con value=""
+        $('#scelta-mese').empty();
+        $('#scelta-mese').append(template({'nome': '-- scegli mese --'}));
+        // per ogni mese, genero una option
+        for (var i = 0; i < mesi.length; i++) {
+            var numero_mese = i + 1;
+            if(numero_mese < 10) {
+                numero_mese = '0' + numero_mese;
+            }
+            $('#scelta-mese').append(template({
+                'numero': numero_mese,
+                'nome': mesi[i]
+            }));
+        }
+    }
+
+    function popola_select_venditori(venditori) {
+        var template = Handlebars.compile($('#venditore-template').html());
+        // svuoto la select e inserisco la prima option con value=""
+        $('#scelta-venditore').empty();
+        $('#scelta-venditore').append(template({'nome': '-- scegli venditore --'}));
+        // per ogni venditore, genero una option
+        for (var i = 0; i < venditori.length; i++) {
+            $('#scelta-venditore').append(template({
+                'nome': venditori[i],
+                'valore': venditori[i]
+            }));
+        }
+    }
+
+    function genera_random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) ) + min;
     }
 
 });

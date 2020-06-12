@@ -10,16 +10,49 @@
     </head>
     <body>
 
+        <header>
+            <select id="scelta-venditore">
+                <option value="">-- scegli venditore --</option>
+                <option value="Riccardo">Riccardo</option>
+                <option value="Roberto">Roberto</option>
+                <option value="Marco">Marco</option>
+                <option value="Giuseppe">Giuseppe</option>
+            </select>
+            <select id="scelta-mese">
+                <option value="">-- scegli mese vendita --</option>
+                <option value="gennaio">gennaio</option>
+                <option value="febbraio">febbraio</option>
+                <option value="marzo">marzo</option>
+                <option value="aprile">aprile</option>
+                <option value="maggio">maggio</option>
+                <option value="giugno">giugno</option>
+                <option value="luglio">luglio</option>
+                <option value="agosto">agosto</option>
+                <option value="settembre">settembre</option>
+                <option value="ottobre">ottobre</option>
+                <option value="novembre">novembre</option>
+                <option value="dicembre">dicembre</option>
+            </select>
+            <input type="number" id="importo-vendita" placeholder="Inserisci importo">
+            <button id="aggiungi-vendita">Aggiungi</button>
+        </header>
+
         <div id="vendite-mensili" class="chart-container">
             <h1>Vendite totali ripartite tra i mesi del 2017</h1>
-            <canvas id="grafico-vendite-mensili"></canvas>
+            <div id="grafico-vendite-mensili-wrapper">
+                <canvas id="grafico-vendite-mensili"></canvas>
+            </div>
         </div>
 
         <div id="vendite-venditori" class="chart-container">
             <h1>Vendite totali ripartite tra i venditori</h1>
-            <canvas id="grafico-vendite-venditori"></canvas>
+            <div id="grafico-vendite-venditori-wrapper">
+                <canvas id="grafico-vendite-venditori"></canvas>
+            </div>
+
         </div>
 
-        <script src="main.js" charset="utf-8"></script>
+        <!-- <script src="main.js" charset="utf-8"></script> -->
+        <script src="main-update.js" charset="utf-8"></script>
     </body>
 </html>

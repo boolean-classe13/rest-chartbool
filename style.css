@@ -4,6 +4,11 @@
     box-sizing: border-box;
 }
 
+header {
+    text-align: center;
+    padding: 50px 0;
+}
+
 .chart-container {
     max-width: 800px;
     margin: 50px auto;

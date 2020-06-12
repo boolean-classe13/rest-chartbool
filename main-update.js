@@ -4,7 +4,11 @@ $(document).ready(function() {
     // imposto le traduzioni di moment in italiano
     moment.locale('it');
 
-    disegna_grafici();
+    var grafico_mesi;
+    var grafico_venditori;
+
+    disegna_grafici(false);
+
 
     $('#aggiungi-vendita').click(function() {
         var venditore_scelto = $('#scelta-venditore').val();
@@ -25,7 +29,7 @@ $(document).ready(function() {
                 amount: importo_inserito
             },
             'success': function(data) {
-                disegna_grafici();
+                disegna_grafici(true);
             },
             'error': function() {
                 console.log('si è verificato un errore');
@@ -34,7 +38,7 @@ $(document).ready(function() {
 
     });
 
-    function disegna_grafici() {
+    function disegna_grafici(aggiorna) {
 
         $.ajax({
             'url': url_api,
@@ -48,8 +52,17 @@ $(document).ready(function() {
                 var mesi = Object.keys(dati_vendite_mensili);
                 // estraggo i valori, che saranno i dati del grafico
                 var dati_mesi = Object.values(dati_vendite_mensili);
-                // disegno il grafico passandogli le etichette e i dati
-                disegna_grafico_vendite_mensili(mesi, dati_mesi);
+
+                if(!aggiorna) {
+                    // disegno per la prima volta il grafico
+                    // disegno il grafico passandogli le etichette e i dati
+                    disegna_grafico_vendite_mensili(mesi, dati_mesi);
+                } else {
+                    // aggiorno il grafico
+                    // modifico i dati del grafico impostando l'array con i dati aggiornati
+                    grafico_mesi.config.data.datasets[0].data = dati_mesi;
+                    grafico_mesi.update();
+                }
 
                 /* grafico vendite venditore */
                 // costruisco un oggetto che mappa i venditori con il totale delle vendite
@@ -58,8 +71,17 @@ $(document).ready(function() {
                 var nomi_venditori = Object.keys(dati_vendite_venditori);
                 // estraggo i valori, che saranno i dati del grafico
                 var dati_venditori = Object.values(dati_vendite_venditori);
-                // disegno il grafico passandogli le etichette e i dati
-                disegna_grafico_vendite_venditori(nomi_venditori, dati_venditori);
+                if(!aggiorna) {
+                    // disegno per la prima volta il grafico
+                    // disegno il grafico passandogli le etichette e i dati
+                    disegna_grafico_vendite_venditori(nomi_venditori, dati_venditori);
+                } else {
+                    // aggiorno il grafico
+                    // modifico i dati del grafico impostando l'array con i dati aggiornati
+                    grafico_venditori.config.data.datasets[0].data = dati_venditori;
+                    grafico_venditori.update();
+                }
+
             },
             'error': function() {
                 console.log('si è verificato un errore');
@@ -144,10 +166,7 @@ $(document).ready(function() {
 
     function disegna_grafico_vendite_mensili(etichette, dati) {
 
-        $('#grafico-vendite-mensili-wrapper').empty();
-        $('#grafico-vendite-mensili-wrapper').append('<canvas id="grafico-vendite-mensili"></canvas>');
-
-        var myChart = new Chart($('#grafico-vendite-mensili')[0].getContext('2d'), {
+        grafico_mesi = new Chart($('#grafico-vendite-mensili')[0].getContext('2d'), {
             type: 'line',
             data: {
                 labels: etichette,
@@ -185,10 +204,7 @@ $(document).ready(function() {
 
     function disegna_grafico_vendite_venditori(etichette, dati) {
 
-        $('#grafico-vendite-venditori-wrapper').empty();
-        $('#grafico-vendite-venditori-wrapper').append('<canvas id="grafico-vendite-venditori"></canvas>');
-
-        var myChart = new Chart($('#grafico-vendite-venditori')[0].getContext('2d'), {
+        grafico_venditori = new Chart($('#grafico-vendite-venditori')[0].getContext('2d'), {
             type: 'pie',
             data: {
                 labels: etichette,
@@ -222,6 +238,7 @@ $(document).ready(function() {
                 }
             }
         });
+
     }
 
 });
